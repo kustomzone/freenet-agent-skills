@@ -17,16 +17,33 @@ Based on [River](https://github.com/freenet/river), a decentralized chat applica
 
 ### Claude Code
 
-Copy the skill directory to your Claude skills folder:
-
+**Option 1: Clone and copy**
 ```bash
-cp -r dapp-builder ~/.claude/skills/
+git clone https://github.com/freenet/freenet-agent-skills.git
+cp -r freenet-agent-skills/dapp-builder ~/.claude/skills/
 ```
 
-Or symlink it:
-
+**Option 2: Clone and symlink** (easier to update)
 ```bash
-ln -s /path/to/freenet-agent-skills/dapp-builder ~/.claude/skills/
+git clone https://github.com/freenet/freenet-agent-skills.git ~/freenet-agent-skills
+ln -s ~/freenet-agent-skills/dapp-builder ~/.claude/skills/
+```
+
+To update a symlinked skill:
+```bash
+cd ~/freenet-agent-skills && git pull
+```
+
+**Verify installation:**
+Ask Claude: "What skills are available?" - it should list `freenet-dapp-builder`.
+
+### Project-specific installation
+
+To include a skill in a specific project (shared with team):
+```bash
+mkdir -p .claude/skills
+cp -r freenet-agent-skills/dapp-builder .claude/skills/
+git add .claude/skills
 ```
 
 ## Contributing
