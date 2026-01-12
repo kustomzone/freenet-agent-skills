@@ -145,6 +145,105 @@ pub trait ComposableState {
 }
 ```
 
+## Commutative Monoid Requirement
+
+Contract state must form a **commutative monoid** under the merge operation. This means:
+
+1. **Associativity:** `merge(merge(A, B), C) == merge(A, merge(B, C))`
+2. **Commutativity:** `merge(A, B) == merge(B, A)`
+3. **Identity:** There exists an empty/initial state `I` where `merge(A, I) == A`
+
+This ensures that regardless of the order peers receive and apply updates, they all converge to the same final state.
+
+### Testing Commutativity
+
+**Every contract should have unit tests verifying these properties.** Use property-based testing for thorough coverage:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use proptest::prelude::*;
+
+    // Generate arbitrary valid states for testing
+    fn arb_state() -> impl Strategy<Value = MyState> {
+        // Define how to generate random valid states
+        (any::<u64>(), any::<String>()).prop_map(|(id, data)| {
+            MyState { id, data }
+        })
+    }
+
+    proptest! {
+        /// Merging in any order produces the same result
+        #[test]
+        fn merge_is_commutative(a in arb_state(), b in arb_state()) {
+            let ab = a.clone().merge(&b);
+            let ba = b.clone().merge(&a);
+            prop_assert_eq!(ab, ba);
+        }
+
+        /// Grouping doesn't matter: (A merge B) merge C == A merge (B merge C)
+        #[test]
+        fn merge_is_associative(a in arb_state(), b in arb_state(), c in arb_state()) {
+            let ab_c = a.clone().merge(&b).merge(&c);
+            let a_bc = a.clone().merge(&b.clone().merge(&c));
+            prop_assert_eq!(ab_c, a_bc);
+        }
+
+        /// Merging with empty state returns original
+        #[test]
+        fn merge_identity(a in arb_state()) {
+            let empty = MyState::default();
+            let merged = a.clone().merge(&empty);
+            prop_assert_eq!(merged, a);
+        }
+    }
+
+    /// Test with specific edge cases
+    #[test]
+    fn merge_concurrent_updates() {
+        let base = MyState::new();
+
+        // Simulate two peers making different updates
+        let mut peer_a = base.clone();
+        peer_a.add_item(Item { id: 1, value: "from A" });
+
+        let mut peer_b = base.clone();
+        peer_b.add_item(Item { id: 2, value: "from B" });
+
+        // Both merge orders should produce identical results
+        let a_then_b = peer_a.clone().merge(&peer_b);
+        let b_then_a = peer_b.clone().merge(&peer_a);
+
+        assert_eq!(a_then_b, b_then_a);
+        assert!(a_then_b.has_item(1));
+        assert!(a_then_b.has_item(2));
+    }
+
+    /// Test delta round-trip
+    #[test]
+    fn delta_summary_roundtrip() {
+        let state_a = /* ... */;
+        let state_b = /* state_a with some updates */;
+
+        let summary_a = state_a.summarize();
+        let delta = state_b.delta(&summary_a);
+
+        let mut reconstructed = state_a.clone();
+        reconstructed.apply_delta(&delta);
+
+        assert_eq!(reconstructed, state_b);
+    }
+}
+```
+
+### Common Commutativity Bugs
+
+1. **Non-deterministic tie-breakers:** Using random values or timestamps captured at merge time
+2. **Order-dependent collections:** Using `Vec` where order matters instead of `HashMap`/`BTreeMap`
+3. **Mutation during iteration:** Modifying state while iterating can produce different results
+4. **Missing items in merge:** Only keeping "newer" items without proper conflict resolution
+
 ## Commutativity Strategies
 
 ### 1. Set-Based Operations
