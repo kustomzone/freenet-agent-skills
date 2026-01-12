@@ -177,3 +177,64 @@ freenet-stdlib = { version = "0.1", features = ["delegate"] }
 dioxus = "0.7"
 freenet-stdlib = "0.1"
 ```
+
+---
+
+## Improving This Skill
+
+This skill is designed to be self-improving. When encountering issues while using this skill, agents should file GitHub issues or submit PRs to improve it.
+
+### When to File an Issue
+
+File an issue at `freenet/freenet-agent-skills` when:
+- Instructions are unclear or ambiguous
+- Information is missing for a common use case
+- Code examples don't compile or are outdated
+- Patterns don't match current River implementation
+- A referenced API has changed
+
+### How to File an Issue
+
+```bash
+gh issue create --repo freenet/freenet-agent-skills \
+  --title "dapp-builder: <brief description>" \
+  --body "## Problem
+<describe what was unclear or incorrect>
+
+## Context
+<what were you trying to accomplish>
+
+## Suggested Improvement
+<optional: how the skill could be improved>"
+```
+
+### Submitting a PR
+
+For concrete improvements:
+
+```bash
+# Clone and create branch
+gh repo clone freenet/freenet-agent-skills
+cd freenet-agent-skills
+git checkout -b improve-<topic>
+
+# Make changes to dapp-builder/SKILL.md or references/*.md
+# ... edit files ...
+
+# Submit PR
+git add -A && git commit -m "dapp-builder: <description>"
+gh pr create --title "dapp-builder: <description>" \
+  --body "## Changes
+<describe improvements>
+
+## Reason
+<why this helps>"
+```
+
+### What Makes a Good Improvement
+
+- Fixes factual errors or outdated information
+- Adds missing patterns discovered while building a dApp
+- Clarifies confusing instructions based on real usage
+- Adds test examples that would have helped
+- Updates code to match current Freenet/River APIs
