@@ -14,6 +14,10 @@ rustup target add wasm32-unknown-unknown
 # Install Dioxus CLI
 cargo install dioxus-cli
 
+# Install Freenet tools (from freenet-core repo)
+cargo install --path crates/core   # freenet binary
+cargo install --path crates/fdev   # fdev development tool
+
 # For UI styling (optional)
 npm install  # in ui/ directory
 ```
@@ -202,6 +206,37 @@ args = ["test", "-p", "my-contract"]
 description = "Run clippy"
 command = "cargo"
 args = ["clippy", "--workspace", "--all-targets"]
+
+# ============================================
+# LOCAL MODE TESTING
+# ============================================
+
+[tasks.local-node]
+description = "Start Freenet in local mode for testing"
+command = "freenet"
+args = ["local"]
+# Runs on 127.0.0.1:7509 by default
+
+[tasks.publish-local]
+description = "Publish contract to local node"
+dependencies = ["build-contract"]
+script = '''
+fdev publish \
+    --code target/wasm32-unknown-unknown/release/my_contract.wasm \
+    --parameters parameters.bin \
+    contract \
+    --state initial_state.bin
+'''
+# fdev defaults to local mode (127.0.0.1:7509)
+
+[tasks.update-local]
+description = "Send update to local contract"
+script = '''
+fdev execute update ${CONTRACT_KEY} \
+    --delta delta.bin \
+    --address 127.0.0.1 \
+    --port 7509
+'''
 ```
 
 ## UI package.json (for Tailwind)
@@ -233,9 +268,13 @@ cargo make build-contract         # Just the contract
 cargo make build-delegate         # Just the delegate
 cargo make build-ui               # Just the UI
 
-# Testing
+# Unit testing
 cargo make test                   # All tests
 cargo make clippy                 # Linting
+
+# Integration testing with local mode
+cargo make local-node             # Start local Freenet node
+cargo make publish-local          # Publish contract to local node
 
 # Deployment
 cargo make package-webapp         # Create archive
@@ -275,6 +314,95 @@ fn main() {
     let fresh_hash = sha256(&wasm);
     // ... verification logic
 }
+```
+
+## Testing with Local Mode
+
+Freenet's **local mode** runs a standalone executor without network connectivity. Use this for testing contract and delegate logic during development.
+
+### What Local Mode Does
+
+- Runs contracts/delegates locally without P2P networking
+- WebSocket API available at `127.0.0.1:7509`
+- Operations complete immediately (no network round-trips)
+- Subscribe operations are no-ops (no remote peers)
+- All state stored and retrieved locally
+
+### Development Workflow
+
+**Terminal 1: Start Local Node**
+```bash
+# With debug logging
+RUST_BACKTRACE=1 RUST_LOG=freenet=debug freenet local
+
+# Or via cargo-make
+cargo make local-node
+```
+
+**Terminal 2: Publish and Test**
+```bash
+# Build contract
+cargo make build-contract
+
+# Publish to local node (fdev defaults to local mode)
+fdev publish \
+    --code target/wasm32-unknown-unknown/release/my_contract.wasm \
+    --parameters params.bin \
+    contract \
+    --state initial_state.bin
+
+# Returns contract key, e.g.: HjT8Kf2...
+
+# Send an update
+fdev execute update HjT8Kf2... \
+    --delta update.bin
+
+# Get current state
+fdev execute get HjT8Kf2...
+```
+
+**Terminal 3: Run UI**
+```bash
+# UI connects to local node at ws://127.0.0.1:7509
+cargo make dev
+```
+
+### Testing Levels
+
+1. **Unit Tests** - Test state logic without Freenet
+   - Commutativity tests (see contract-patterns.md)
+   - Serialization round-trips
+   - Validation logic
+   ```bash
+   cargo test -p my-contract
+   ```
+
+2. **Local Mode** - Test with real Freenet executor
+   - Contract deployment and state management
+   - Delegate secret storage
+   - UI integration via WebSocket
+   ```bash
+   freenet local  # Terminal 1
+   cargo make dev # Terminal 2
+   ```
+
+3. **Network Simulation** - Test P2P behavior (advanced)
+   ```bash
+   fdev test single-process --nodes 5
+   ```
+   Runs multiple simulated nodes in-memory for network behavior testing.
+
+### Environment Variables
+
+```bash
+# Enable debug logging
+RUST_LOG=freenet=debug
+
+# Show backtraces on panic
+RUST_BACKTRACE=1
+
+# fdev mode (default is already "local")
+MODE=local
 ```
 
 ## River Build Reference
