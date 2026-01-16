@@ -1,0 +1,24 @@
+{
+  "name": "freenet-agent-skills",
+  "owner": {
+    "name": "Freenet Project",
+    "email": "support@freenet.org"
+  },
+  "metadata": {
+    "description": "AI coding agent skills for building applications on Freenet",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "freenet-skills",
+      "description": "Complete Freenet development toolkit: dApp building, PR creation, and systematic debugging",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/dapp-builder",
+        "./skills/pr-creation",
+        "./skills/systematic-debugging"
+      ]
+    }
+  ]
+}

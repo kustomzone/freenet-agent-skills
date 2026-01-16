@@ -31,23 +31,24 @@ Methodology for debugging non-trivial problems:
 
 ## Installation
 
-### Claude Code (Plugin)
+### Claude Code (Recommended)
 
-Install as a plugin for full integration:
+Add the marketplace and install all Freenet skills:
 
 ```bash
-git clone https://github.com/freenet/freenet-agent-skills.git ~/freenet-agent-skills
+/plugin marketplace add freenet/freenet-agent-skills
+/plugin install freenet-skills
 ```
 
-Then add to your Claude Code settings (`.claude/settings.json`):
+Or browse available plugins:
 
-```json
-{
-  "plugins": ["~/freenet-agent-skills"]
-}
+```bash
+/plugin
 ```
 
-### Claude Code (Manual)
+Then navigate to **Discover** tab and select `freenet-skills`.
+
+### Manual Installation
 
 **Option 1: Copy individual skills**
 ```bash
@@ -72,14 +73,7 @@ ln -s ~/freenet-agent-skills/skills/pr-creation ~/.claude/skills/
 ln -s ~/freenet-agent-skills/skills/systematic-debugging ~/.claude/skills/
 ```
 
-Or use OpenCode's native path:
-
-```bash
-mkdir -p ~/.config/opencode/skill
-ln -s ~/freenet-agent-skills/skills/dapp-builder ~/.config/opencode/skill/
-```
-
-### Project-specific installation
+### Project-specific Installation
 
 To include a skill in a specific project (shared with team):
 
@@ -97,10 +91,11 @@ Ask your AI agent: "What skills are available?" - it should list the installed s
 ```
 freenet-agent-skills/
 ├── .claude-plugin/
-│   └── plugin.json        # Claude Code plugin manifest
+│   └── marketplace.json   # Claude Code marketplace manifest
 ├── skills/
 │   ├── dapp-builder/
 │   │   ├── SKILL.md       # Main skill definition
+│   │   ├── README.md      # Skill documentation
 │   │   └── references/    # Detailed documentation
 │   ├── pr-creation/
 │   │   └── SKILL.md
