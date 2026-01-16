@@ -5,17 +5,25 @@
     "email": "support@freenet.org"
   },
   "metadata": {
-    "description": "AI coding agent skills for building applications on Freenet",
+    "description": "AI coding agent skills for Freenet development",
     "version": "1.0.0"
   },
   "plugins": [
     {
-      "name": "freenet-skills",
-      "description": "Complete Freenet development toolkit: dApp building, PR creation, and systematic debugging",
+      "name": "freenet-dapp-builder",
+      "description": "Build decentralized applications on Freenet - contracts, delegates, and UI",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/dapp-builder",
+        "./skills/dapp-builder"
+      ]
+    },
+    {
+      "name": "freenet-core-dev",
+      "description": "Freenet core development - PR creation guidelines and systematic debugging methodology",
+      "source": "./",
+      "strict": false,
+      "skills": [
         "./skills/pr-creation",
         "./skills/systematic-debugging"
       ]

@@ -33,20 +33,23 @@ Methodology for debugging non-trivial problems:
 
 ### Claude Code (Recommended)
 
-Add the marketplace and install all Freenet skills:
+Add the marketplace:
 
 ```bash
 /plugin marketplace add freenet/freenet-agent-skills
-/plugin install freenet-skills
 ```
 
-Or browse available plugins:
+Then install the plugin you need:
 
 ```bash
-/plugin
+# For building apps on Freenet
+/plugin install freenet-dapp-builder
+
+# For contributing to Freenet core
+/plugin install freenet-core-dev
 ```
 
-Then navigate to **Discover** tab and select `freenet-skills`.
+Or browse available plugins via `/plugin` → **Discover** tab.
 
 ### Manual Installation
 
